@@ -9,4 +9,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./@"),
     },
   },
+  base: 'https://Albertlll.github.io/web_mem_gen'
 })
