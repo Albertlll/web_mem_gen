@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 // import { Button } from "@/components/ui/button"
@@ -6,15 +6,22 @@ import BaseImage from "./components/shared/BaseImage"
 // import { Input } from "@/components/ui/input"
 import { Stage, Layer, Rect } from "react-konva"
 import { Vector2d } from "konva/lib/types"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import ToolBar from "./components/ToolBar"
 // import { KonvaEventObject } from "konva/lib/Node"
 import ImageInputBtn from "./components/shared/ImageInputBtn"
 import { Button } from "@/components/ui/button"
+// import { ScrollArea } from "@/components/ui/scroll-area"
+// import { KonvaEventObject } from "konva/lib/Node"
+
+import { Text } from "konva/lib/shapes/Text"
+import { Layer as La } from "konva/lib/Layer"
+import { Stage as St} from "konva/lib/Stage"
+
 export function CardWithForm() {
   const [userBaseImage, setUserBaseImage] = useState<string | null>(null)
   const [memSize, setMemSize] = useState<{width : number, height: number}>({width: 500, height: 500})
   const [scale, setScale] = useState<Vector2d>({x: 1, y: 1})
-
+  const stageRef = useRef<St | null>(null) 
 
   const handleSelectBaseImage = (imageList : FileList | null) => {
     if(imageList && imageList[0]) {
@@ -31,9 +38,38 @@ export function CardWithForm() {
       setUserBaseImage(url)
 
     }
-    
+
+
+   
   
   }
+
+
+  const createClick = (e : any) => {
+    const stage = e.target.getStage()
+    const pos = stage.getPointerPosition()
+
+    const newText = new Text({
+      x: pos.x / scale.x,
+      y: pos.y / scale.y,
+      width: 200,
+      height: 100,
+      fill: "red",
+      stroke: "red",
+      strokeWidth: 1,
+      fontSize: 24,
+      fontFamily: "Arial",
+      text: "Одобрено"
+    })
+
+    const newLayer = new La()
+
+    newLayer.add(newText)
+
+    stage.add(newLayer)
+    stage.draw()
+  }
+  
 
   const handleWheel = (e : any) => {
 
@@ -47,25 +83,48 @@ export function CardWithForm() {
 
   }
 
+  const handleExport = () => {
+
+    if (!stageRef.current) return;
+    const uri = stageRef.current.toDataURL({
+      quality: 0.9,
+    })
+
+    var link = document.createElement("a");
+    link.href = uri;
+    link.download = "exported_image.png";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    link.remove();
+    
+
+
+  }
+
   return (
     <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel defaultSize={75} className="relative flex justify-center items-center !overflow-scroll">
+      <ResizablePanel defaultSize={75} className="relative flex justify-center items-center">
         {userBaseImage ? 
         <>
-            <Stage className="" scale={scale} onWheel={(e) => handleWheel(e)} width={memSize.width * scale.x} height={memSize.height * scale.y}>
+        <Stage ref={stageRef} onClick={(e) => createClick(e)} scale={scale} onWheel={(e) => handleWheel(e)} width={memSize.width * scale.x} height={memSize.height * scale.y}>
  
-              <Layer>
-                <Rect width={memSize.width} height={memSize.height} fill="white" >
+          <Layer>
+            <Rect width={memSize.width} height={memSize.height} fill="white" >
 
-                </Rect>
-              </Layer>
+            </Rect>
+          </Layer>
 
-              <Layer>
-                <BaseImage inp_image={userBaseImage}/>
-              </Layer>
-            </Stage>
+          <Layer>
+            <BaseImage inp_image={userBaseImage}/>
+          </Layer>
+          </Stage>
+            <div className=" bg-background absolute right-5 flex flex-col justify-center h-1000 border-solid border-[1px] border-slate-500 p-5 rounded-sm">
+            <ToolBar/>
+            </div>
 
-            </>
+          </>
 
         :
                 'Сначала загрузите основу вашего мема!'      
@@ -80,20 +139,7 @@ export function CardWithForm() {
         {userBaseImage ?
         <ResizablePanelGroup direction="vertical">
           <ResizablePanel  defaultSize={85} className="relative flex flex-col justify-center items-center">
-          <div className=" bg-background absolute right-5 flex flex-col justify-center h-1000 border-solid border-[1px] border-slate-500 p-5 rounded-sm">
 
-          <ToggleGroup className="flex-col" type="single" orientation="vertical">
-            <ToggleGroupItem className="left" value="text">Текст</ToggleGroupItem>
-            <ToggleGroupItem value="photo">Фото</ToggleGroupItem>
-            <ToggleGroupItem value="video">Видео</ToggleGroupItem>
-            <ToggleGroupItem value="sound">Звук</ToggleGroupItem>
-            <ToggleGroupItem value="shape">Фигура</ToggleGroupItem>
-            <ToggleGroupItem value="background">Фон</ToggleGroupItem>
-            <ToggleGroupItem value="effect">Эффект</ToggleGroupItem>
-            <ToggleGroupItem value="other">Другое</ToggleGroupItem>
-          </ToggleGroup>
-
-          </div>
 
             <div className="absolute left-5 w-[calc(100%-156px)]">
             тут будут типа настройки текста там, позиционирование
@@ -105,7 +151,7 @@ export function CardWithForm() {
 
           <ResizablePanel  defaultSize={15} className="flex flex-col gap-5 justify-center items-center">
               <ImageInputBtn selectHandle={handleSelectBaseImage} text='Поменять основу'/>
-              <Button>Экспорт</Button>
+              <Button onClick={handleExport} className="w-[300px]">Экспорт</Button>
           </ResizablePanel>
 
         </ResizablePanelGroup>
