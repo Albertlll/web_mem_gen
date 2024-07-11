@@ -4,7 +4,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 // import { Button } from "@/components/ui/button"
 import BaseImage from "./components/shared/BaseImage"
 // import { Input } from "@/components/ui/input"
-import { Stage, Layer, Rect } from "react-konva"
+import { Stage, Layer, Rect, Transformer } from "react-konva"
 import { Vector2d } from "konva/lib/types"
 import ToolBar from "./components/ToolBar"
 // import { KonvaEventObject } from "konva/lib/Node"
@@ -16,12 +16,17 @@ import { Button } from "@/components/ui/button"
 import { Text } from "konva/lib/shapes/Text"
 import { Layer as La } from "konva/lib/Layer"
 import { Stage as St} from "konva/lib/Stage"
-
+import { Transformer as Tr } from "konva/lib/shapes/Transformer"
+import { Text as Te } from "konva/lib/shapes/Text"
 export function CardWithForm() {
   const [userBaseImage, setUserBaseImage] = useState<string | null>(null)
   const [memSize, setMemSize] = useState<{width : number, height: number}>({width: 500, height: 500})
   const [scale, setScale] = useState<Vector2d>({x: 1, y: 1})
+
+  const [currrentTool, setCurrentTool] = useState<string | undefined>(undefined)
   const stageRef = useRef<St | null>(null) 
+  const textLayerRef = useRef<La | null>(null) 
+  const transformerRef = useRef<Tr | null>(null) 
 
   const handleSelectBaseImage = (imageList : FileList | null) => {
     if(imageList && imageList[0]) {
@@ -44,6 +49,40 @@ export function CardWithForm() {
   
   }
 
+  const textClick = (e : any) => {
+    console.log('textClick');
+    if (!transformerRef.current) return
+    transformerRef.current.nodes([e.target])
+  }
+
+
+
+
+
+  const stageClick = (e : any) => {
+    console.log(currrentTool)
+    switch (currrentTool) {
+      case '':
+        // removeTransformer();
+        break;
+      case "text":
+        createClick(e)
+        break;
+      case "photo":
+        break;
+      case "shape":
+        break;
+      case "effect":
+        break;
+
+      default:
+        break;
+    }
+
+
+
+  }
+
 
   const createClick = (e : any) => {
     const stage = e.target.getStage()
@@ -52,21 +91,21 @@ export function CardWithForm() {
     const newText = new Text({
       x: pos.x / scale.x,
       y: pos.y / scale.y,
-      width: 200,
-      height: 100,
       fill: "red",
       stroke: "red",
       strokeWidth: 1,
       fontSize: 24,
       fontFamily: "Arial",
-      text: "Одобрено"
+      text: "Одобрено",
+      draggable: true,
+      
     })
 
-    const newLayer = new La()
+    newText.on("click", (event) => {textClick(event)})
 
-    newLayer.add(newText)
+    if (!textLayerRef.current) return
 
-    stage.add(newLayer)
+    textLayerRef.current.add(newText)
     stage.draw()
   }
   
@@ -108,7 +147,8 @@ export function CardWithForm() {
       <ResizablePanel defaultSize={75} className="relative flex justify-center items-center">
         {userBaseImage ? 
         <>
-        <Stage ref={stageRef} onClick={(e) => createClick(e)} scale={scale} onWheel={(e) => handleWheel(e)} width={memSize.width * scale.x} height={memSize.height * scale.y}>
+        <Stage ref={stageRef} onClick={(e) => stageClick(e)} scale={scale} onWheel={(e) => handleWheel(e)} width={memSize.width * scale.x} height={memSize.height * scale.y}>
+
  
           <Layer>
             <Rect width={memSize.width} height={memSize.height} fill="white" >
@@ -119,15 +159,20 @@ export function CardWithForm() {
           <Layer>
             <BaseImage inp_image={userBaseImage}/>
           </Layer>
+
+          <Layer ref={textLayerRef}>
+
+            <Transformer ref={transformerRef}/>
+          </Layer>
           </Stage>
             <div className=" bg-background absolute right-5 flex flex-col justify-center h-1000 border-solid border-[1px] border-slate-500 p-5 rounded-sm">
-            <ToolBar/>
+            <ToolBar value={currrentTool} setCurrentTool={setCurrentTool}/>
             </div>
 
           </>
 
         :
-                'Сначала загрузите основу вашего мема!'      
+          'Сначала загрузите основу вашего мема!'      
         }
       
       </ResizablePanel>
