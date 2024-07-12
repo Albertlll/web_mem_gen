@@ -1,5 +1,5 @@
 import { Text } from "react-konva";
-import { Text as TextClass } from "konva/lib/shapes/Text";
+// import { Text as TextClass } from "konva/lib/shapes/Text";
 import { TextConfig } from "konva/lib/shapes/Text";
 import { Transformer } from "react-konva";
 import { Transformer as TransformerClass } from "konva/lib/shapes/Transformer";
