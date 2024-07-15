@@ -22,7 +22,7 @@ import TextField from "./components/shared/TextField"
 // import { Ref } from "react";
 import { TextConfig } from "konva/lib/shapes/Text";
 import Properties from "./components/TextProperties/Properties"
-import { ShapeConfig } from "konva/lib/Shape"
+// import { ShapeConfig } from "konva/lib/Shape"
 
 
 export interface TextFieldRrops extends TextConfig{
@@ -41,7 +41,7 @@ export function CardWithForm() {
   // const [text, setText] = useState<string>("")
 
 
-  const [draggings, setDragging] = useState<boolean>(false)
+  // const [draggings, setDragging] = useState<boolean>(false)
   const [shapeContainer, setShapeContainer] = useState<Array<TextFieldRrops>>([])
 
 
@@ -213,7 +213,7 @@ export function CardWithForm() {
                 selected={selectedElem == index}
                 onClick={() => {textClick(index)}}
 
-                onDragStart={() => {setSelectedElem(index); setDragging(true)}}
+                onDragStart={() => {setSelectedElem(index)}}
                 onDragEnd={(e : any) => {rewriteCoords(e)}}
 
                 />
