@@ -25,8 +25,8 @@ import Properties from "./components/TextProperties/Properties"
 import { ShapeConfig } from "konva/lib/Shape"
 
 
-interface TextFieldRrops extends TextConfig{
-  type: "text"
+export interface TextFieldRrops extends TextConfig{
+  type: string
 }
 
 export function CardWithForm() {
@@ -36,8 +36,14 @@ export function CardWithForm() {
   const [currrentTool, setCurrentTool] = useState<string | undefined>(undefined)
 
   const [selectedElem, setSelectedElem] = useState<number | null>(null)
+
+
   // const [text, setText] = useState<string>("")
+
+
+  const [draggings, setDragging] = useState<boolean>(false)
   const [shapeContainer, setShapeContainer] = useState<Array<TextFieldRrops>>([])
+
 
   const stageRef = useRef<St | null>(null) 
   const textLayerRef = useRef<La | null>(null) 
@@ -121,7 +127,7 @@ export function CardWithForm() {
   const createClick = (e : any) => {
     const stage = e.target.getStage()
     const pos = stage.getPointerPosition()
-    setShapeContainer([...shapeContainer, {
+    setShapeContainer(prev => [...prev, {
       x: pos.x / scale.x,
       y: pos.y / scale.y,
       fill: "red",
@@ -166,6 +172,19 @@ export function CardWithForm() {
     link.remove();
   }
 
+
+  const rewriteCoords = (e : any) => {
+    if (selectedElem === null) return;
+
+    console.log(e.target.x(), e.target.y())
+
+    setShapeContainer((prev: Array<TextFieldRrops>) =>
+      [...prev.slice(0, (selectedElem !== null) ? selectedElem : -1),
+      {...prev[selectedElem], x : e.target.x(), y : e.target.y()} ,
+      ...prev.slice(selectedElem + 1)])
+
+  }
+
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel defaultSize={75} className="relative flex justify-center items-center">
@@ -193,7 +212,11 @@ export function CardWithForm() {
                 {...item}
                 selected={selectedElem == index}
                 onClick={() => {textClick(index)}}
-                onDragStart={() => {setSelectedElem(index)}}/>
+
+                onDragStart={() => {setSelectedElem(index); setDragging(true)}}
+                onDragEnd={(e : any) => {rewriteCoords(e)}}
+
+                />
               </>
           
             ))}
@@ -222,8 +245,12 @@ export function CardWithForm() {
         {userBaseImage ?
         <ResizablePanelGroup direction="vertical">
           <ResizablePanel  defaultSize={85} className="relative flex flex-col justify-center items-center">
-            <Properties currrentElemType={selectedElem || selectedElem == 0 ? shapeContainer[selectedElem].type : ''}/>
-            
+            {(selectedElem || selectedElem==0) &&
+            <Properties shapeContainer={shapeContainer}
+                        selectedElem={selectedElem}
+                        setShapeContainer={setShapeContainer}
+                        />
+            }
           </ResizablePanel>
 
           <ResizableHandle withHandle/>
