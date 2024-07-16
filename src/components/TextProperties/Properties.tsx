@@ -26,6 +26,7 @@ function Properties(props : PropertiesRrops) {
     // }
 
     const setBaseProperties = (setObj : {x : number} | {y : number} | {w : number} | {h : number}) => {
+        console.log(setObj)
         
         props.setShapeContainer((prev: Array<TextFieldRrops>) =>
             [...prev.slice(0, (props.selectedElem || props.selectedElem==0) ? props.selectedElem : -1),

@@ -130,16 +130,19 @@ export function CardWithForm() {
     setShapeContainer(prev => [...prev, {
       x: pos.x / scale.x,
       y: pos.y / scale.y,
-      fill: "red",
-      stroke: "red",
+      fill: "#ffe2f1",
+      stroke: "#ffe2f1",
       strokeWidth: 1,
       fontSize: 24,
       fontFamily: "Arial",
       text: "Одобрено",
       draggable: true,
       selected: false,
-      type: "text"
+      type: "text",
+
       }])
+
+    setSelectedElem(shapeContainer.length)
   }
   
 
@@ -151,8 +154,6 @@ export function CardWithForm() {
         y: prev.y * (1 - e.evt.deltaY * 0.001),
       }))
     }
-
-
   }
 
   const handleExport = () => {
